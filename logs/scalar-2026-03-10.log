@@ -43,3 +43,4 @@
 {"level":"error","message":"Relay Error: Error: getaddrinfo ENOTFOUND via.placeholder.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26) {\n  [stack]: [Getter/Setter],\n  [message]: 'getaddrinfo ENOTFOUND via.placeholder.com',\n  errno: -3008,\n  code: 'ESTREAM',\n  syscall: 'getaddrinfo',\n  hostname: 'via.placeholder.com',\n  sourceUrl: 'https://via.placeholder.com/100x100.png?text=Logo',\n  command: 'API'\n}","service":"scalar-relay","timestamp":"2026-03-10 17:30:49"}
 {"level":"info","message":"Relay Success: Email sent to ucchash.connect@gmail.com","service":"scalar-relay","timestamp":"2026-03-10 17:31:08"}
 {"level":"info","message":"Relay Success: Email sent to ucchash.connect@gmail.com","service":"scalar-relay","timestamp":"2026-03-10 17:31:20"}
+{"level":"warn","message":"Dashboard Login Failure","service":"scalar-relay","timestamp":"2026-03-10 17:55:18"}
