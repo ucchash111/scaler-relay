@@ -271,12 +271,17 @@
                 <div class="space-y-8">
                     <div class="px-2 flex items-center justify-between">
                         <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-500">Fast Implementation</h3>
-                        <select id="snippet-type" onchange="updateSnippet()"
-                            class="bg-zinc-950 border border-zinc-800 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-zinc-400 focus:outline-none focus:border-zinc-700 cursor-pointer">
-                            <option value="json">JSON API</option>
-                            <option value="text">Plain Text</option>
-                            <option value="html">HTML Layout</option>
-                        </select>
+                        <div class="flex items-center gap-3">
+                            <input type="password" id="app-pass" oninput="updateSnippet()"
+                                placeholder="SMTP_PASS (Optional)"
+                                class="bg-zinc-950 border border-zinc-800 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full text-zinc-400 focus:outline-none focus:border-emerald-500/50 transition-colors w-32 placeholder:text-zinc-700">
+                            <select id="snippet-type" onchange="updateSnippet()"
+                                class="bg-zinc-950 border border-zinc-800 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-zinc-400 focus:outline-none focus:border-zinc-700 cursor-pointer">
+                                <option value="json">JSON API</option>
+                                <option value="text">Plain Text</option>
+                                <option value="html">HTML Layout</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="relative group">
                         <pre class="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 overflow-x-auto text-[11px] font-mono text-zinc-400 leading-relaxed max-h-[400px]"
@@ -339,6 +344,7 @@
 
         function updateSnippet() {
             const type = document.getElementById('snippet-type').value;
+            const appPass = document.getElementById('app-pass').value;
             const code = document.getElementById('snippet-code');
 
             let payload = {};
@@ -348,6 +354,15 @@
                 payload = { to: 'user@example.com', subject: 'Plain Signal', text: 'Multi-line\nText\nBurst' };
             } else {
                 payload = { to: 'user@example.com', subject: 'Rich Payload', html: '<h1>Scalar</h1><p>Relay Online.</p>' };
+            }
+
+            if (appPass) {
+                payload.smtpOverride = {
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    user: 'your-email@gmail.com',
+                    pass: appPass
+                };
             }
 
             const curl = `curl -X POST ${HOST_URL}/api/send \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${API_KEY}" \\\n  -d '${JSON.stringify(payload, null, 2)}'`;
