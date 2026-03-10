@@ -30,7 +30,7 @@ docker run -d \
 
 1. Create a new **Service** in Coolify.
 2. Select **Docker Compose**.
-3. Paste the contents of `docker-compose.yml`.
+3. Paste the contents of `docker-compose.yaml`.
 4. Add `SESSION_SECRET` to the environment variables.
 5. Deploy. Coolify will automatically detect the health check!
 
@@ -44,13 +44,13 @@ docker run -d \
 #### 1. Coolify Service Selection
 To make Scalar Relay a "Pre-selected" service in Coolify:
 - Add `coolify.json` to the root of your repository (already included).
-- Submit a PR to the [Coolify Services Repository](https://github.com/coollabsio/coolify/tree/main/templates/compose) with your `docker-compose.yml`.
+- Submit a PR to the [Coolify Services Repository](https://github.com/coollabsio/coolify/tree/main/templates/compose) with your `docker-compose.yaml`.
 - Your service will then appear in the "Services" catalog for all Coolify users.
 
 #### 2. Docker Hub (Automated)
 This project is configured with GitHub Actions to automatically build and push the `latest` image to Docker Hub on every push to `main`.
 - **Image**: `ucchash111/scalar-relay:latest`
-- To use your own registry, update `.github/workflows/docker-publish.yml`.
+- To use your own registry, update `.github/workflows/docker-publish.yaml`.
 
 #### 3. NPM (CLI tool)
 You can also distribute Scalar as a global CLI:

@@ -5,7 +5,7 @@
     "services": [
         {
             "type": "docker-compose",
-            "file": "docker-compose.yml"
+            "file": "docker-compose.yaml"
         }
     ],
     "env": {
