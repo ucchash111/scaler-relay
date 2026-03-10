@@ -111,7 +111,9 @@ const checkSetup = (req, res, next) => {
     const config = getConfig();
     const isSetupValid = config && config.dashboardPassword;
 
-    if (!isSetupValid && req.path !== '/setup' && !req.path.startsWith('/api') && !req.path.startsWith('/public')) {
+    const isAcmeChallenge = req.path.startsWith('/.well-known/');
+
+    if (!isSetupValid && req.path !== '/setup' && !req.path.startsWith('/api') && !req.path.startsWith('/public') && !isAcmeChallenge) {
         return res.redirect('/setup');
     }
     next();
