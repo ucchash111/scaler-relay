@@ -10,7 +10,7 @@
     "start": "node src/index.js",
     "dev": "npx tailwindcss -i ./public/css/input.css -o ./public/css/style.css --watch & node src/index.js",
     "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/style.css --minify",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -27,11 +27,15 @@
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
     "nodemailer": "^8.0.2",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
+    "jest": "^30.3.0",
     "postcss": "^8.5.8",
+    "supertest": "^7.2.2",
     "tailwindcss": "^4.2.1"
   }
 }

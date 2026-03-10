@@ -1,0 +1,2 @@
+{"level":"warn","message":"Unauthorized API access attempt with key: undefined","service":"scalar-relay","timestamp":"2026-03-10 15:59:14"}
+{"address":"127.0.0.1","code":"ESOCKET","command":"CONN","errno":-61,"level":"error","message":"Relay Error sending to user@example.com: %e","port":1025,"service":"scalar-relay","syscall":"connect","timestamp":"2026-03-10 15:59:14"}

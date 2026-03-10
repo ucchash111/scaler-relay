@@ -63,6 +63,13 @@ You can also distribute Scalar as a global CLI:
 #### 4. GitHub Template
 Turn this repository into a **Template** (Settings -> General -> Template Repository) so users can click "Use this template" to start their own instance.
 
+#### 5. Extended API
+Scalar Relay includes a professional API suite for deep integration:
+- `GET /api/info`: Instance metadata and status.
+- `GET /api/config`: Current configuration (safe fields, requires Master Key).
+- `GET /api/logs`: View recent relay logs (requires Master Key).
+- `POST /api/keys`: Programmatically generate new API keys (requires Master Key).
+
 ## 🔌 API Usage
 
 ### Send an Email

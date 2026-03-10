@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/ucchash/Documents/dev/open-src/scaler-relay/logs/.16d1a55b7252e1843352d967a69e7f82babf2001-audit.json",
+    "files": [
+        {
+            "date": 1773136710800,
+            "name": "/Users/ucchash/Documents/dev/open-src/scaler-relay/logs/scalar-2026-03-10.log",
+            "hash": "ceb29b72554e629f0f603e0fb5f518ba91301b5b8b028fc1fadc4d8d87e335c5"
+        }
+    ],
+    "hashType": "sha256"
+}

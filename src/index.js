@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -10,14 +10,23 @@ const session = require('express-session');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const logger = require('./utils/logger');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATABASE_URL = process.env.DATABASE_URL; // Future use
+const DATABASE_URL = process.env.DATABASE_URL;
 const CONFIG_PATH = path.join(__dirname, '../config/config.json');
 
-// In-memory log store (max 50)
+// Environment Validation
+const REQUIRED_ENV = ['SESSION_SECRET'];
+const missingEnv = REQUIRED_ENV.filter(key => !process.env[key]);
+if (missingEnv.length > 0 && process.env.NODE_ENV === 'production') {
+    logger.error('CRITICAL: Missing required environment variables: %s', missingEnv.join(', '));
+    process.exit(1);
+}
+
+// In-memory log store (max 50) for dashboard
 let emailLogs = [];
 const MAX_LOGS = 50;
 
@@ -41,7 +50,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'scalar-relay-secret-legacy',
+    secret: process.env.SESSION_SECRET || 'scalar-relay-secret-dev',
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -56,6 +65,7 @@ const getConfig = () => {
         try {
             return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
         } catch (e) {
+            logger.error('Failed to parse config.json: %e', e);
             return null;
         }
     }
@@ -63,10 +73,15 @@ const getConfig = () => {
 };
 
 const saveConfig = (config) => {
-    if (!fs.existsSync(path.dirname(CONFIG_PATH))) {
-        fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
+    try {
+        if (!fs.existsSync(path.dirname(CONFIG_PATH))) {
+            fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
+        }
+        fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+        logger.info('Configuration saved successfully.');
+    } catch (e) {
+        logger.error('Failed to save configuration: %e', e);
     }
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
 };
 
 // Middleware: Check if setup is complete
@@ -91,6 +106,41 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
+/**
+ * @api {get} /api/info Fetch system information
+ */
+app.get('/api/info', (req, res) => {
+    res.json({
+        name: 'Scalar Relay',
+        version: '1.1.0',
+        engine: 'Node.js ' + process.version,
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+/**
+ * @api {get} /api/config Fetch public configuration
+ * @header {String} x-api-key Master API Key
+ */
+app.get('/api/config', apiLimiter, (req, res) => {
+    const config = getConfig();
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+
+    if (!config) return res.status(500).json({ error: 'System not configured' });
+
+    const isMaster = config.keys.find(k => k.id === 'master' && k.key === apiKey);
+    if (!isMaster) return res.status(401).json({ error: 'Unauthorized: Master Key required' });
+
+    // Exclude password and SMTP credentials for security
+    const { dashboardPassword, smtp, ...safeConfig } = config;
+    res.json({
+        ...safeConfig,
+        smtpHost: smtp.host,
+        smtpPort: smtp.port
+    });
+});
+
 app.get('/setup', (req, res) => {
     const config = getConfig();
     if (config) return res.redirect('/');
@@ -99,7 +149,7 @@ app.get('/setup', (req, res) => {
 
 app.post('/setup', (req, res) => {
     const { smtpHost, smtpPort, smtpUser, smtpPass, primaryEmail, dashboardPassword } = req.body;
-    const masterApiKey = `sk_${uuidv4().replace(/-/g, '')}`;
+    const masterApiKey = `sk_${crypto.randomUUID().replace(/-/g, '')}`;
 
     const config = {
         smtp: { host: smtpHost, port: smtpPort, user: smtpUser, pass: smtpPass },
@@ -113,6 +163,7 @@ app.post('/setup', (req, res) => {
 
     saveConfig(config);
     req.session.authenticated = true;
+    logger.info('System setup completed by %s', primaryEmail);
     res.redirect('/');
 });
 
@@ -127,8 +178,10 @@ app.post('/login', checkSetup, (req, res) => {
 
     if (config && password === config.dashboardPassword) {
         req.session.authenticated = true;
+        logger.info('Successful dashboard login.');
         return res.redirect('/');
     }
+    logger.warn('Failed dashboard login attempt.');
     res.render('login', { error: 'Invalid dashboard password' });
 });
 
@@ -146,6 +199,53 @@ app.get('/', checkSetup, requireAuth, (req, res) => {
     });
 });
 
+/**
+ * @api {get} /api/logs Fetch recent relay logs
+ * @header {String} x-api-key Master API Key
+ */
+app.get('/api/logs', apiLimiter, (req, res) => {
+    const config = getConfig();
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+
+    if (!config) return res.status(500).json({ error: 'System not configured' });
+
+    // Only master key can access logs
+    const isMaster = config.keys.find(k => k.id === 'master' && k.key === apiKey);
+    if (!isMaster) return res.status(401).json({ error: 'Unauthorized: Master Key required' });
+
+    res.json(emailLogs);
+});
+
+/**
+ * @api {post} /api/keys Generate a new tenant API key
+ * @header {String} x-api-key Master API Key
+ * @body {String} label Label for the new key
+ */
+app.post('/api/keys', apiLimiter, (req, res) => {
+    const config = getConfig();
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+    const { label } = req.body;
+
+    if (!config) return res.status(500).json({ error: 'System not configured' });
+    if (!label) return res.status(400).json({ error: 'Label is required' });
+
+    const isMaster = config.keys.find(k => k.id === 'master' && k.key === apiKey);
+    if (!isMaster) return res.status(401).json({ error: 'Unauthorized: Master Key required' });
+
+    const newKey = {
+        id: crypto.randomUUID(),
+        key: `sk_${crypto.randomUUID().replace(/-/g, '')}`,
+        label,
+        created: new Date().toISOString()
+    };
+
+    config.keys.push(newKey);
+    saveConfig(config);
+
+    logger.info('New API Key generated: %s', label);
+    res.status(201).json(newKey);
+});
+
 app.post('/api/send', apiLimiter, async (req, res) => {
     const config = getConfig();
     const apiKey = req.headers['x-api-key'] || req.query.apiKey;
@@ -154,6 +254,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
 
     const validKey = config.keys.find(k => k.key === apiKey);
     if (!validKey) {
+        logger.warn('Unauthorized API access attempt with key: %s', apiKey);
         return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
     }
 
@@ -184,7 +285,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
         });
 
         const logEntry = {
-            id: uuidv4(),
+            id: crypto.randomUUID(),
             to,
             subject,
             status: 'Sent',
@@ -197,13 +298,24 @@ app.post('/api/send', apiLimiter, async (req, res) => {
         emailLogs.unshift(logEntry);
         if (emailLogs.length > MAX_LOGS) emailLogs.pop();
 
+        logger.info('Email sent successfully to %s via %s', to, validKey.label);
         res.json({ success: true, messageId: info.messageId, gateway: !!smtpOverride });
     } catch (error) {
-        console.error('Relay Error:', error);
+        logger.error('Relay Error sending to %s: %e', to, error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Scalar Relay Bridge live at http://localhost:${PORT}`);
+// Robust Error Handling Middleware
+app.use((err, req, res, next) => {
+    logger.error('Unhandled Exception: %e', err);
+    res.status(500).json({ error: 'Internal Server Error' });
 });
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        logger.info(`Scalar Relay Bridge live at http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app; // For testing
