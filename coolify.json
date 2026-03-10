@@ -9,13 +9,21 @@
         }
     ],
     "env": {
+        "SERVICE_FQDN_SCALAR": {
+            "description": "The Fully Qualified Domain Name (FQDN) for your Scalar Relay instance (e.g., https://relay.example.com).",
+            "required": true
+        },
         "SESSION_SECRET": {
-            "description": "High entropy secret for session management.",
+            "description": "High-entropy secret for secure session management. Generate a random string.",
             "required": true
         },
         "PORT": {
             "description": "Internal port the service runs on.",
             "value": "3000"
+        },
+        "NODE_ENV": {
+            "description": "The environment the application runs in.",
+            "value": "production"
         }
     }
 }
