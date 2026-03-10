@@ -1,0 +1,21 @@
+{
+  "name": "Scalar Relay",
+  "description": "Professional SMTP Relay Bridge for SaaS and Self-Hosting.",
+  "icon": "https://raw.githubusercontent.com/yourusername/scaler-relay/main/public/icon.png",
+  "services": [
+    {
+      "type": "docker-compose",
+      "file": "docker-compose.yml"
+    }
+  ],
+  "env": {
+    "SESSION_SECRET": {
+      "description": "High entropy secret for session management.",
+      "required": true
+    },
+    "PORT": {
+      "description": "Internal port the service runs on.",
+      "value": "3000"
+    }
+  }
+}

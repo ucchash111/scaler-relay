@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Scalar Relay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tab-btn.active {
+            @apply text-indigo-400 border-b-2 border-indigo-400;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0f172a] text-slate-50 min-h-screen py-10 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Scalar Relay</h1>
+                <p class="text-slate-400 text-sm">SMTP Bridge Dashboard</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-widest block">Instance</span>
+                <code class="text-indigo-400 text-sm font-mono"><%= primaryEmail %></code>
+            </div>
+        </header>
+
+        <!-- API Key Box -->
+        <div
+            class="bg-[#1e293b] rounded-2xl border border-dashed border-indigo-500/50 p-6 flex items-center justify-between shadow-2xl mb-10">
+            <div>
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">Master API
+                    Key</label>
+                <code id="apiKey" class="text-xl font-mono text-indigo-300 tracking-wider"><%= apiKey %></code>
+            </div>
+            <button onclick="copyKey()"
+                class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-6 py-2 rounded-xl text-sm font-bold border border-indigo-500/30 transition-all">
+                Copy Key
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid lg:grid-cols-5 gap-8">
+            <!-- Feed -->
+            <div class="lg:col-span-3 bg-[#1e293b] rounded-2xl border border-slate-700 p-8">
+                <h2 class="text-xl font-bold mb-6">Live Feed</h2>
+                <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                    <% if (logs.length===0) { %>
+                        <div class="text-center py-12">
+                            <p class="text-slate-500">No activity detected yet.</p>
+                        </div>
+                        <% } %>
+                            <% logs.forEach(log=> { %>
+                                <div
+                                    class="flex items-center justify-between p-4 bg-[#0f172a]/50 rounded-xl border border-slate-800/50">
+                                    <div>
+                                        <span class="block font-semibold text-slate-200">
+                                            <%= log.to %>
+                                        </span>
+                                        <span class="text-xs text-slate-500">
+                                            <%= log.subject %>
+                                        </span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                                            <%= log.status %>
+                                        </span>
+                                        <span
+                                            class="block text-[10px] text-slate-600 mt-1 uppercase font-bold tracking-tighter">
+                                            <%= log.timestamp %>
+                                        </span>
+                                    </div>
+                                </div>
+                                <% }) %>
+                </div>
+            </div>
+
+            <!-- Test Console -->
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-[#1e293b] rounded-2xl border border-slate-700 p-8 shadow-xl">
+                    <h2 class="text-xl font-bold mb-6">Test Console</h2>
+                    <form id="testForm" class="space-y-4">
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Recipient</label>
+                            <input type="email" id="testTo" placeholder="recipient@example.com" required
+                                class="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors">
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Subject</label>
+                            <input type="text" id="testSubject" value="Test from Scalar Relay" required
+                                class="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors">
+                        </div>
+                        <button type="submit" id="sendBtn"
+                            class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+                            Fire Relay
+                        </button>
+                    </form>
+                    <div id="testResult" class="mt-4 text-xs font-semibold text-center h-4"></div>
+                </div>
+
+                <!-- Integration Guide -->
+                <div class="bg-[#1e293b] rounded-2xl border border-slate-700 p-8 shadow-xl">
+                    <h2 class="text-xl font-bold mb-4">Integrate</h2>
+                    <div class="flex gap-4 border-b border-slate-700 mb-6">
+                        <button onclick="showTab('n8n')"
+                            class="tab-btn active pb-3 text-sm font-semibold transition-all">n8n</button>
+                        <button onclick="showTab('python')"
+                            class="tab-btn pb-3 text-sm font-semibold text-slate-500 transition-all">Python</button>
+                        <button onclick="showTab('curl')"
+                            class="tab-btn pb-3 text-sm font-semibold text-slate-500 transition-all">cURL</button>
+                    </div>
+
+                    <div id="n8n" class="tab-content">
+                        <pre class="bg-[#0f172a] p-4 rounded-xl text-[11px] font-mono text-indigo-300 overflow-x-auto">
+Method: POST
+URL: /api/send
+Header: x-api-key: <%= apiKey %>
+Body: { "to": "...", "subject": "..." }</pre>
+                    </div>
+                    <div id="python" class="tab-content hidden">
+                        <pre class="bg-[#0f172a] p-4 rounded-xl text-[11px] font-mono text-indigo-300 overflow-x-auto">
+import requests
+requests.post("/api/send", 
+headers={"x-api-key": "<%= apiKey %>"},
+json={"to": "..."})</pre>
+                    </div>
+                    <div id="curl" class="tab-content hidden">
+                        <pre class="bg-[#0f172a] p-4 rounded-xl text-[11px] font-mono text-indigo-300 overflow-x-auto">
+curl -X POST /api/send \
+-H "x-api-key: <%= apiKey %>" \
+-d '{"to":"..."}'</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyKey() {
+            const key = document.getElementById('apiKey').innerText;
+            navigator.clipboard.writeText(key);
+            alert('API Key copied!');
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'text-indigo-400', 'border-b-2', 'border-indigo-400');
+                b.classList.add('text-slate-500');
+            });
+            document.getElementById(id).classList.remove('hidden');
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.add('active', 'text-indigo-400', 'border-b-2', 'border-indigo-400');
+            activeBtn.classList.remove('text-slate-500');
+        }
+
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('sendBtn');
+            const resDiv = document.getElementById('testResult');
+            btn.disabled = true; btn.innerText = 'Relaying...';
+
+            try {
+                const res = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': '<%= apiKey %>' },
+                    body: JSON.stringify({
+                        to: document.getElementById('testTo').value,
+                        subject: document.getElementById('testSubject').value,
+                        text: 'Scalar Relay test sequence initiated.',
+                        html: '<p>Scalar Relay <b>test sequence</b> initiated.</p>'
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    resDiv.className = 'mt-4 text-xs font-semibold text-center text-green-400';
+                    resDiv.innerText = 'Sequence Successful';
+                    setTimeout(() => location.reload(), 1500);
+                } else { throw new Error(data.error); }
+            } catch (err) {
+                resDiv.className = 'mt-4 text-xs font-semibold text-center text-red-400';
+                resDiv.innerText = err.message;
+            } finally {
+                btn.disabled = false; btn.innerText = 'Fire Relay';
+            }
+        });
+    </script>
+</body>
+
+</html>
