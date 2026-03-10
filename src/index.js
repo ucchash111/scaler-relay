@@ -290,7 +290,29 @@ app.post('/api/send', apiLimiter, async (req, res) => {
     const keyInfo = getValidKey(config, apiKey);
     if (!keyInfo) return res.status(401).json({ error: 'Invalid API Key' });
 
-    const { to, subject, text, html, attachments, fromOverride, smtpOverride } = req.body;
+    const { to, subject, text, html, attachments, fromOverride, from, smtpOverride } = req.body;
+    const finalFrom = from || fromOverride;
+
+    // Email Syntax Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const recipients = String(to).split(',').map(e => e.trim());
+    const invalidEmails = recipients.filter(e => !emailRegex.test(e));
+
+    if (invalidEmails.length > 0) {
+        return res.status(400).json({ success: false, error: `Invalid recipient emails: ${invalidEmails.join(', ')}` });
+    }
+
+    // Basic Debouncing: Prevent duplicate sends to same recipient/subject within 60s
+    const now = Date.now();
+    const isDuplicate = emailLogs.some(log =>
+        log.to === to &&
+        log.subject === subject &&
+        (now - new Date(log.rawTimestamp).getTime()) < 60000
+    );
+
+    if (isDuplicate) {
+        return res.status(429).json({ success: false, error: 'Duplicate transmission detected within flux window (60s).' });
+    }
 
     const smtpConfig = (smtpOverride && smtpOverride.host) ? {
         host: smtpOverride.host,
@@ -314,7 +336,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
     });
 
     try {
-        const fromAddress = fromOverride || `Scalar Relay <${smtpConfig.auth.user}>`;
+        const fromAddress = finalFrom || `Scalar Relay <${smtpConfig.auth.user}>`;
 
         const info = await transporter.sendMail({
             from: fromAddress,
@@ -326,6 +348,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
             to, subject,
             status: 'Sent',
             timestamp: new Date().toLocaleTimeString(),
+            rawTimestamp: new Date().toISOString(),
             tenant: keyInfo.label
         };
 
