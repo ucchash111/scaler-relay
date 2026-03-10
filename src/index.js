@@ -128,7 +128,7 @@ app.get('/health', (req, res) => {
 app.get('/api/info', (req, res) => {
     res.json({
         name: 'Scalar Relay',
-        version: '1.2.0',
+        version: '1.0.0',
         engine: 'Node.js ' + process.version,
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'development'
@@ -311,7 +311,7 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
     app.listen(PORT, () => {
-        logger.info(`Scalar Relay v1.2.0 online at ${PORT}`);
+        logger.info(`Scalar Relay v1.0.0 online at ${PORT}`);
     });
 }
 

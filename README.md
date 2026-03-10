@@ -2,16 +2,16 @@
 
 **Scalar Relay** is an architectural bridge designed to decouple sensitive SMTP credentials from your application logic. By utilizing a stateless HTTP-to-SMTP execution model, Scalar eliminates the need for persistent credential storage in distributed n8n, Docker, and CI/CD environments.
 
-![Scalar Relay Dashboard](https://via.placeholder.com/800x450.png?text=Scalar+Relay+Dashboard+Preview)
+![Scalar Relay Hero](./media/hero.png)
 
 ## 🚀 Key Features
 
 - **Stateless by Design**: Sensitive credentials stay in one place. Your apps just need an API Key.
-- **Dashboard Security**: Protected by a login page and password.
+- **Gateway Mode**: Allow API requests to override global credentials for complex workflows.
 - **Setup Wizard**: Sleek onboarding to configure your SMTP settings in seconds.
 - **Live Feed Dashboard**: Monitor the last 50 sent emails in real-time (In-memory, RAM-only).
-- **Test Console**: Verify your SMTP connection directly from the UI.
-- **Gateway Mode**: Allow API requests to override global credentials for complex workflows.
+- **Test Console**: Verify your SMTP connection directly from the dashboard.
+- **Secure by Default**: Protected by BCrypt hashing and secure session management.
 - **Open Source & Extensible**: Built with Node.js, EJS, and Tailwind CSS.
 
 ## 🛠️ Quick Start
