@@ -16,6 +16,11 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Proper proxy support for secure cookies in production (e.g., behind Coolify/Nginx)
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 const CONFIG_PATH = path.join(__dirname, '../config/config.json');
 
 // Environment Validation

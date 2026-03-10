@@ -9,7 +9,7 @@
         }
     ],
     "env": {
-        "SERVICE_FQDN_SCALAR": {
+        "SERVICE_FQDN": {
             "description": "The Fully Qualified Domain Name (FQDN) for your Scalar Relay instance (e.g., https://relay.example.com).",
             "required": true
         },
