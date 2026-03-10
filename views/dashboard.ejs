@@ -79,7 +79,7 @@
             </div>
             <div class="flex flex-col">
                 <h1 class="text-lg font-bold tracking-tight text-white italic">Scalar Relay</h1>
-                <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] font-bold">v1.2.0 • Active
+                <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] font-bold">v1.0.0 • Active
                     Pool</span>
             </div>
         </div>
@@ -100,33 +100,51 @@
 
     <main class="max-w-7xl mx-auto px-8 py-16 space-y-16">
         <!-- Stats Row -->
-        <header class="grid grid-cols-1 md:grid-cols-3 gap-1 border-zinc-800 border-y">
+        <header class="grid grid-cols-1 md:grid-cols-4 gap-1 border-zinc-800 border-y">
             <div class="py-12 px-8 flex flex-col gap-3 border-r border-zinc-800 bg-zinc-900/10">
-                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em] font-bold">Primary
+                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em]">Primary
                     Identity</span>
-                <span class="text-lg font-bold text-zinc-100">
+                <span class="text-base font-bold text-zinc-100 italic">
                     <%= primaryEmail %>
                 </span>
             </div>
-            <div class="py-12 px-8 flex flex-col gap-3 border-r border-zinc-800 bg-zinc-900/10">
-                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em] font-bold">Master API
+            <div class="py-12 px-8 flex flex-col gap-3 border-r border-zinc-800 bg-zinc-900/10 col-span-2">
+                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em]">Master API
                     Key</span>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-4">
                     <code
-                        class="text-sm text-zinc-400 font-mono font-bold truncate w-64 bg-zinc-950/50 px-2 py-1 rounded border border-zinc-800"
+                        class="text-sm text-zinc-100 font-mono font-bold truncate flex-1 bg-zinc-950/50 px-3 py-2 rounded-lg border border-white/5"
                         id="apikey"><%= apiKey %></code>
-                    <button onclick="copyKey()"
-                        class="text-xs text-zinc-100 font-bold underline hover:no-underline uppercase tracking-widest">Copy</button>
+                    <div class="flex items-center gap-4">
+                        <button onclick="copyKey()"
+                            class="text-[10px] text-zinc-400 font-black hover:text-white uppercase tracking-widest transition-colors">Copy</button>
+                        <button onclick="rotateKey()"
+                            class="text-[10px] text-rose-500/80 font-black hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                                <path d="M16 16h5v5" />
+                            </svg>
+                            Rotate
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 h-2">
                     <span id="copy-msg"
-                        class="text-[10px] text-emerald-500 font-black opacity-0 transition-opacity tracking-widest">SUCCESS</span>
+                        class="text-[9px] text-emerald-500 font-black opacity-0 transition-opacity tracking-widest">SIGNAL_COPIED</span>
+                    <span id="rotate-msg"
+                        class="text-[9px] text-rose-500 font-black opacity-0 transition-opacity tracking-widest uppercase">SIGNAL_ROTATED</span>
                 </div>
             </div>
             <div class="py-12 px-8 flex flex-col gap-3 bg-zinc-900/10">
-                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em] font-bold">Transmission
+                <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em]">Transmission
                     Flux</span>
-                <span class="text-lg font-bold text-zinc-100 italic">
+                <span class="text-base font-bold text-zinc-100 italic">
                     <%= logs.length %> <span
-                            class="text-zinc-600 text-xs uppercase font-black tracking-[0.2em] ml-2 not-italic">Signals
+                            class="text-zinc-600 text-[10px] uppercase font-black tracking-[0.2em] ml-2 not-italic">Signals
                             Bursted</span>
                 </span>
             </div>
@@ -249,21 +267,42 @@
                         class="text-[11px] font-black text-center uppercase tracking-[0.2em] min-h-[1.5rem]"></p>
                 </div>
 
+                <!-- Quick SDK -->
+                <div class="space-y-8">
+                    <div class="px-2 flex items-center justify-between">
+                        <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-500">Fast Implementation</h3>
+                        <select id="snippet-type" onchange="updateSnippet()"
+                            class="bg-zinc-950 border border-zinc-800 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-zinc-400 focus:outline-none focus:border-zinc-700 cursor-pointer">
+                            <option value="json">JSON API</option>
+                            <option value="text">Plain Text</option>
+                            <option value="html">HTML Layout</option>
+                        </select>
+                    </div>
+                    <div class="relative group">
+                        <pre class="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 overflow-x-auto text-[11px] font-mono text-zinc-400 leading-relaxed max-h-[400px]"
+                            id="snippet-code"></pre>
+                        <button onclick="copySnippet()"
+                            class="absolute top-4 right-4 bg-zinc-100 text-zinc-950 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">Copy
+                            Burst</button>
+                    </div>
+                </div>
+
                 <!-- System -->
                 <div class="space-y-6">
-                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Core Insights</h3>
+                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 px-2 italic">Core Logic</h3>
                     <div class="p-8 bg-zinc-900/30 rounded-2xl border border-zinc-800 space-y-6">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em]">Protocol
-                                V1.2</span>
+                            <span class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em]">Bridge
+                                Protocol</span>
                             <span
-                                class="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[9px] font-black rounded-full border border-emerald-500/30 tracking-widest uppercase">Hybrid_Eng</span>
+                                class="px-2 py-0.5 bg-zinc-100 text-zinc-950 text-[9px] font-black rounded-full tracking-widest uppercase">STATLESS_V2</span>
                         </div>
                         <p class="text-sm text-zinc-500 leading-relaxed font-bold italic">The bridge facilitates
-                            <strong>Nodemailer attachments</strong>. Base64 & link-based payloads are natively
-                            supported. Consult the <a href="/docs"
-                                class="text-zinc-200 underline hover:text-white transition-colors decoration-zinc-700">Schema
-                                Bible</a> for definitions.</p>
+                            <strong>Stateless SMTP execution</strong>. No persistent signals are cached. Consult the <a
+                                href="/docs"
+                                class="text-zinc-200 underline hover:text-white transition-colors decoration-zinc-800">Schema
+                                Bible</a> for more.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -271,17 +310,58 @@
     </main>
 
     <script>
+        const API_KEY = '<%= apiKey %>';
+        const HOST_URL = window.location.origin;
+
         function copyKey() {
-            const range = document.createRange();
-            range.selectNode(document.getElementById("apikey"));
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            document.execCommand("copy");
-            window.getSelection().removeAllRanges();
+            const el = document.getElementById("apikey");
+            navigator.clipboard.writeText(el.innerText);
             const msg = document.getElementById('copy-msg');
             msg.style.opacity = '1';
             setTimeout(() => msg.style.opacity = '0', 2000);
         }
+
+        async function rotateKey() {
+            if (!confirm('WARNING: Rotating the Master Key will invalidate all current integrations using it. Continue?')) return;
+
+            try {
+                const res = await fetch('/api/keys/rotate-master', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    const msg = document.getElementById('rotate-msg');
+                    msg.style.opacity = '1';
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } catch (err) {
+                alert('Rotation Failed: ' + err.message);
+            }
+        }
+
+        function updateSnippet() {
+            const type = document.getElementById('snippet-type').value;
+            const code = document.getElementById('snippet-code');
+
+            let payload = {};
+            if (type === 'json') {
+                payload = { to: 'user@example.com', subject: 'API Burst', text: 'Hello from Scalar' };
+            } else if (type === 'text') {
+                payload = { to: 'user@example.com', subject: 'Plain Signal', text: 'Multi-line\nText\nBurst' };
+            } else {
+                payload = { to: 'user@example.com', subject: 'Rich Payload', html: '<h1>Scalar</h1><p>Relay Online.</p>' };
+            }
+
+            const curl = `curl -X POST ${HOST_URL}/api/send \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${API_KEY}" \\\n  -d '${JSON.stringify(payload, null, 2)}'`;
+            code.innerText = curl;
+        }
+
+        function copySnippet() {
+            const code = document.getElementById('snippet-code').innerText;
+            navigator.clipboard.writeText(code);
+            alert('Snippet copied to clipboard');
+        }
+
+        // Init
+        updateSnippet();
 
         document.getElementById('test-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -303,7 +383,7 @@
             try {
                 const res = await fetch('/api/send', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': '<%= apiKey %>' },
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
                     body: JSON.stringify(data)
                 });
                 const result = await res.json();

@@ -226,6 +226,35 @@ app.get('/api/logs', apiLimiter, (req, res) => {
     res.json(emailLogs);
 });
 
+app.post('/api/keys/rotate-master', requireAuth, (req, res) => {
+    const config = getConfig();
+    if (!config) return res.status(500).json({ error: 'Not configured' });
+
+    const newMasterKey = `sk_${crypto.randomUUID().replace(/-/g, '')}`;
+
+    if (!config.keys) config.keys = [];
+
+    // Find existing master and update it, or add if missing
+    let masterIndex = config.keys.findIndex(k => k.id === 'master' || k.label === 'Master Key');
+
+    const masterObj = {
+        id: 'master',
+        key: newMasterKey,
+        label: 'Master Key',
+        created: new Date().toISOString()
+    };
+
+    if (masterIndex !== -1) {
+        config.keys[masterIndex] = masterObj;
+    } else {
+        config.keys.unshift(masterObj);
+    }
+
+    saveConfig(config);
+    logger.info('Master API Key rotated by user');
+    res.json({ success: true, key: newMasterKey });
+});
+
 app.post('/api/keys', apiLimiter, (req, res) => {
     const config = getConfig();
     const apiKey = req.headers['x-api-key'] || req.query.apiKey;
