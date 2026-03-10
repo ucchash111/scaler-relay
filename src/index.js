@@ -229,22 +229,30 @@ app.post('/api/send', apiLimiter, async (req, res) => {
 
     const smtpConfig = (smtpOverride && smtpOverride.host) ? {
         host: smtpOverride.host,
-        port: smtpOverride.port || 465,
+        port: parseInt(smtpOverride.port) || 465,
         auth: { user: smtpOverride.user, pass: smtpOverride.pass }
     } : {
-        host: config.smtp.host,
-        port: config.smtp.port,
-        auth: { user: config.smtp.user, pass: config.smtp.pass }
+        host: config.smtp?.host || '',
+        port: parseInt(config.smtp?.port) || 465,
+        auth: { user: config.smtp?.user || '', pass: config.smtp?.pass || '' }
     };
 
+    if (!smtpConfig.host) {
+        return res.status(400).json({ success: false, error: 'No SMTP host configured or provided in override.' });
+    }
+
     const transporter = nodemailer.createTransport({
-        ...smtpConfig,
-        secure: smtpConfig.port == 465
+        host: smtpConfig.host,
+        port: smtpConfig.port,
+        secure: smtpConfig.port === 465,
+        auth: smtpConfig.auth
     });
 
     try {
+        const fromAddress = fromOverride || `Scalar Relay <${smtpConfig.auth.user}>`;
+
         const info = await transporter.sendMail({
-            from: fromOverride || smtpConfig.auth.user,
+            from: fromAddress,
             to, subject, text, html
         });
 
