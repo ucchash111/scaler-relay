@@ -4,8 +4,6 @@ services:
   scalar-relay:
     build: .
     container_name: scalar-relay
-    ports:
-      - "${APP_PORT:-3000}:3000"
     volumes:
       - scalar_config:/app/config
     environment:
