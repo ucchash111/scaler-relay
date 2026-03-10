@@ -1,7 +1,7 @@
 {
   "name": "scaler-relay",
   "version": "1.0.0",
-  "description": "",
+  "description": "Professional SMTP Relay Bridge. Decouple SMTP credentials with a secure HTTP-to-SMTP bridge.",
   "main": "src/index.js",
   "bin": {
     "scalar-relay": "src/index.js"
@@ -12,9 +12,25 @@
     "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/style.css --minify",
     "test": "jest --detectOpenHandles --forceExit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "bridge",
+    "smtp",
+    "relay",
+    "email",
+    "docker",
+    "self-hosted",
+    "saas"
+  ],
+  "author": "Iftekhar Ucchash Ahmed",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ucchash111/scaler-relay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ucchash111/scaler-relay/issues"
+  },
+  "homepage": "https://github.com/ucchash111/scaler-relay#readme",
   "type": "commonjs",
   "dependencies": {
     "body-parser": "^2.2.2",
