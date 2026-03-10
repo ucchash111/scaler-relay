@@ -21,6 +21,10 @@
             "description": "Internal port the service runs on.",
             "value": "3000"
         },
+        "APP_PORT": {
+            "description": "The port exposed on the host machine. Change this if 3000 is already in use.",
+            "value": "3000"
+        },
         "NODE_ENV": {
             "description": "The environment the application runs in.",
             "value": "production"
