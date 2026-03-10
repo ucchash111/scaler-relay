@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference | Scalar Relay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+
+        .geist-border {
+            border: 1px solid #27272a;
+        }
+
+        .geist-card {
+            background: #09090b;
+            border: 1px solid #18181b;
+        }
+
+        code {
+            background: #18181b;
+            color: #e4e4e7;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            border: 1px solid #27272a;
+            font-weight: 600;
+        }
+
+        pre {
+            background: #111113;
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid #27272a;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen selection:bg-zinc-700 selection:text-white pb-32">
+    <!-- Nav -->
+    <nav
+        class="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-8 py-5 flex justify-between items-center">
+        <div class="flex items-center gap-6">
+            <a href="/"
+                class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-white/5">
+                <div class="w-3 h-3 bg-zinc-950 rounded-full"></div>
+            </a>
+            <div class="flex flex-col">
+                <h1 class="text-base font-bold tracking-tight text-white font-black italic">Schema / Protocol</h1>
+                <span class="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Scalar Engine
+                    v1.2</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-10">
+            <a href="/"
+                class="text-sm font-black text-zinc-400 hover:text-white transition-colors uppercase tracking-widest text-[11px]">Dashboard</a>
+            <a href="/logout"
+                class="text-sm font-black text-zinc-500 hover:text-white transition-colors uppercase tracking-widest text-[11px]">Sign
+                Out</a>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-8 py-24 space-y-24">
+        <header class="space-y-8">
+            <h2 class="text-6xl font-extrabold tracking-tighter text-white italic">The Relay Bible</h2>
+            <p class="text-zinc-500 text-lg max-w-3xl leading-relaxed font-bold">A developer-first abstraction layer for
+                SMTP. Secure your credentials, automate your transmissions, and scale your outbound mail with zero local
+                state.</p>
+        </header>
+
+        <!-- Send Endpoint -->
+        <section class="space-y-12">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-8 uppercase">
+                <h3 class="text-3xl font-black tracking-tighter text-zinc-200">POST /api/send</h3>
+                <span
+                    class="px-4 py-1 bg-zinc-900 border border-zinc-700 text-zinc-400 text-[11px] font-black rounded-full tracking-[0.2em] shadow-inner">MASTER_RELAY_INFRA</span>
+            </div>
+
+            <div class="space-y-10">
+                <div class="bg-zinc-900/20 p-8 rounded-2xl border border-zinc-800/80 space-y-6">
+                    <p class="text-base text-zinc-400 leading-relaxed font-medium">Transmit rich-text or HTML payloads
+                        through the bridge. You can use global settings or override them per-request for dynamic
+                        multi-tenant routing from any distributed node.</p>
+
+                    <div class="space-y-4 pt-6">
+                        <label class="text-[11px] font-black text-zinc-600 uppercase tracking-[0.3em]">Identity
+                            Authentication Header</label>
+                        <pre
+                            class="text-sm font-mono text-emerald-400/90 border-emerald-500/20 font-bold">x-api-key: <%= apiKey %></pre>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <h4 class="text-xs font-black text-zinc-500 uppercase tracking-[0.3em] px-3">Payload Schema
+                        Specification</h4>
+                    <div class="overflow-hidden border border-zinc-800/50 rounded-2xl bg-zinc-900/10 shadow-2xl">
+                        <table class="w-full text-left text-[14px]">
+                            <thead class="bg-zinc-900 border-b border-zinc-800">
+                                <tr>
+                                    <th
+                                        class="px-8 py-5 font-black text-zinc-500 uppercase tracking-[0.2em] text-[11px]">
+                                        Property</th>
+                                    <th
+                                        class="px-8 py-5 font-black text-zinc-500 uppercase tracking-[0.2em] text-[11px]">
+                                        Data Type</th>
+                                    <th
+                                        class="px-8 py-5 font-black text-zinc-500 uppercase tracking-[0.2em] text-[11px]">
+                                        Behavioral Context</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-800/30 text-zinc-300 bg-zinc-950/20">
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">to</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">String</td>
+                                    <td class="px-8 py-6 leading-relaxed font-medium">Primary recipient email address.
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">subject</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">String</td>
+                                    <td class="px-8 py-6 font-medium">Protocol header subject line.</td>
+                                </tr>
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">text</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">String</td>
+                                    <td class="px-8 py-6 font-medium text-zinc-400">Stateless plain-text fallback.</td>
+                                </tr>
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">html</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">String</td>
+                                    <td class="px-8 py-6 font-medium">HTML string for rich rendering.</td>
+                                </tr>
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">attachments</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">Array</td>
+                                    <td class="px-8 py-6 font-medium">Native <a
+                                            href="https://nodemailer.com/message/attachments/" target="_blank"
+                                            class="text-zinc-400 underline italic font-bold">Nodemailer Payload</a>.
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-zinc-900/30">
+                                    <td class="px-8 py-6 font-mono text-zinc-100 font-bold italic">smtpOverride</td>
+                                    <td class="px-8 py-6 text-zinc-500 font-bold">Object</td>
+                                    <td class="px-8 py-6 font-medium text-zinc-500 italic">Dynamic JIT gateway
+                                        injection.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-10">
+                    <div class="space-y-6">
+                        <label
+                            class="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] px-3 italic underline">Rich
+                            Signal Example</label>
+                        <pre class="text-xs font-mono text-zinc-300 font-bold border-zinc-800 shadow-xl bg-black/40">{
+  "to": "dev@scalar.sh",
+  "subject": "Branded Invoice",
+  "html": "<h1>Invoice #101</h1>",
+  "attachments": [
+    {
+      "filename": "report.pdf",
+      "path": "https://cdn.sh/file.pdf"
+    }
+  ]
+}</pre>
+                    </div>
+                    <div class="space-y-6">
+                        <label
+                            class="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] px-3 italic underline">Gateway
+                            Injection</label>
+                        <pre class="text-xs font-mono text-zinc-300 font-bold border-zinc-800 shadow-xl bg-black/40">{
+  "to": "...",
+  "smtpOverride": {
+    "host": "smtp.gmail.com",
+    "port": 465,
+    "user": "...",
+    "pass": "..."
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status -->
+        <section class="space-y-12 pt-16">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-8 uppercase">
+                <h3 class="text-3xl font-black tracking-tighter text-zinc-200">System Overwatch</h3>
+                <span
+                    class="px-4 py-1 bg-emerald-950/10 border border-emerald-900/30 text-emerald-500 text-[11px] font-black rounded-full tracking-[0.2em] shadow-inner">PULSE_ACK_UP</span>
+            </div>
+            <p class="text-base text-zinc-500 leading-relaxed max-w-2xl font-bold italic">Bursted ping to
+                <code>GET /health</code> to verify instance overwatch availability and network latency of the bridge
+                internal stack.</p>
+        </section>
+
+        <footer class="pt-32 pb-16 text-center space-y-6">
+            <div class="w-2 h-2 bg-zinc-800 rounded-full mx-auto"></div>
+            <p class="text-[11px] text-zinc-600 font-black tracking-[0.5em] uppercase">Scalar Protocol R12 • Zero State
+                Efficiency</p>
+        </footer>
+    </main>
+</body>
+
+</html>

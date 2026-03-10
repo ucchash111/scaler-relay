@@ -89,10 +89,24 @@ const saveConfig = (config) => {
     }
 };
 
+const getValidKey = (config, apiKey) => {
+    if (!config || !apiKey) return null;
+    if (config.keys && Array.isArray(config.keys)) {
+        const found = config.keys.find(k => k.key === apiKey);
+        if (found) return found;
+    }
+    if (config.masterApiKey && config.masterApiKey === apiKey) {
+        return { id: 'master', key: config.masterApiKey, label: 'Master (Legacy)' };
+    }
+    return null;
+};
+
 // Middleware: Setup required
 const checkSetup = (req, res, next) => {
     const config = getConfig();
-    if (!config && req.path !== '/setup' && !req.path.startsWith('/api') && !req.path.startsWith('/public')) {
+    const isSetupValid = config && config.dashboardPassword;
+
+    if (!isSetupValid && req.path !== '/setup' && !req.path.startsWith('/api') && !req.path.startsWith('/public')) {
         return res.redirect('/setup');
     }
     next();
@@ -159,7 +173,7 @@ app.post('/login', loginLimiter, checkSetup, async (req, res) => {
     const { password } = req.body;
     const config = getConfig();
 
-    if (config && await bcrypt.compare(password, config.dashboardPassword)) {
+    if (config && config.dashboardPassword && await bcrypt.compare(password, config.dashboardPassword)) {
         req.session.authenticated = true;
         logger.info('Dashboard Login Success');
         return res.redirect('/');
@@ -175,10 +189,19 @@ app.get('/logout', (req, res) => {
 
 app.get('/', checkSetup, requireAuth, (req, res) => {
     const config = getConfig();
+    const masterKey = config.keys ? config.keys[0]?.key : config.masterApiKey;
     res.render('dashboard', {
         logs: emailLogs,
-        apiKey: config.keys[0].key,
+        apiKey: masterKey || 'N/A',
         primaryEmail: config.primaryEmail
+    });
+});
+
+app.get('/docs', checkSetup, requireAuth, (req, res) => {
+    const config = getConfig();
+    const masterKey = config.keys ? config.keys[0]?.key : config.masterApiKey;
+    res.render('docs', {
+        apiKey: masterKey || 'N/A'
     });
 });
 
@@ -188,8 +211,10 @@ app.get('/api/logs', apiLimiter, (req, res) => {
 
     if (!config) return res.status(500).json({ error: 'Not configured' });
 
-    const isMaster = config.keys.find(k => k.id === 'master' && k.key === apiKey);
-    if (!isMaster) return res.status(401).json({ error: 'Master Key Required' });
+    const keyInfo = getValidKey(config, apiKey);
+    if (!keyInfo || (keyInfo.id !== 'master' && keyInfo.label !== 'Master Key')) {
+        return res.status(401).json({ error: 'Master Key Required' });
+    }
 
     res.json(emailLogs);
 });
@@ -201,8 +226,12 @@ app.post('/api/keys', apiLimiter, (req, res) => {
 
     if (!config || !label) return res.status(400).json({ error: 'Config/Label missing' });
 
-    const isMaster = config.keys.find(k => k.id === 'master' && k.key === apiKey);
-    if (!isMaster) return res.status(401).json({ error: 'Master Key Required' });
+    const keyInfo = getValidKey(config, apiKey);
+    if (!keyInfo || (keyInfo.id !== 'master' && keyInfo.label !== 'Master Key')) {
+        return res.status(401).json({ error: 'Master Key Required' });
+    }
+
+    if (!config.keys) config.keys = [];
 
     const newKey = {
         id: crypto.randomUUID(),
@@ -222,10 +251,10 @@ app.post('/api/send', apiLimiter, async (req, res) => {
 
     if (!config) return res.status(500).json({ error: 'Not configured' });
 
-    const validKey = config.keys.find(k => k.key === apiKey);
-    if (!validKey) return res.status(401).json({ error: 'Invalid API Key' });
+    const keyInfo = getValidKey(config, apiKey);
+    if (!keyInfo) return res.status(401).json({ error: 'Invalid API Key' });
 
-    const { to, subject, text, html, fromOverride, smtpOverride } = req.body;
+    const { to, subject, text, html, attachments, fromOverride, smtpOverride } = req.body;
 
     const smtpConfig = (smtpOverride && smtpOverride.host) ? {
         host: smtpOverride.host,
@@ -238,7 +267,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
     };
 
     if (!smtpConfig.host) {
-        return res.status(400).json({ success: false, error: 'No SMTP host configured or provided in override.' });
+        return res.status(400).json({ success: false, error: 'No SMTP host available. Configure default or provide override.' });
     }
 
     const transporter = nodemailer.createTransport({
@@ -253,7 +282,7 @@ app.post('/api/send', apiLimiter, async (req, res) => {
 
         const info = await transporter.sendMail({
             from: fromAddress,
-            to, subject, text, html
+            to, subject, text, html, attachments
         });
 
         const logEntry = {
@@ -261,15 +290,16 @@ app.post('/api/send', apiLimiter, async (req, res) => {
             to, subject,
             status: 'Sent',
             timestamp: new Date().toLocaleTimeString(),
-            tenant: validKey.label
+            tenant: keyInfo.label
         };
 
         emailLogs.unshift(logEntry);
         if (emailLogs.length > MAX_LOGS) emailLogs.pop();
 
+        logger.info('Relay Success: Email sent to %s', to);
         res.json({ success: true, messageId: info.messageId });
     } catch (error) {
-        logger.error('Relay Error: %e', error);
+        logger.error('Relay Error: %o', error); // Use %o for object logging
         res.status(500).json({ success: false, error: error.message });
     }
 });

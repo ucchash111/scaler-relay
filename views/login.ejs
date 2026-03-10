@@ -10,24 +10,25 @@
     <style>
         body {
             font-family: 'Geist', sans-serif;
-            background-color: #000;
-            color: #fff;
+            background-color: #09090b;
+            color: #f4f4f5;
         }
 
         .geist-input {
-            background: #000;
-            border: 1px solid #333;
-            transition: border-color 0.2s;
+            background: #111113;
+            border: 1px solid #27272a;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .geist-input:focus {
-            border-color: #fff;
+            border-color: #52525b;
+            box-shadow: 0 0 0 1px #52525b;
             outline: none;
         }
 
         .geist-button {
-            background: #fff;
-            color: #000;
+            background: #fafafa;
+            color: #09090b;
             transition: opacity 0.2s;
         }
 
@@ -41,37 +42,45 @@
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col justify-center items-center px-6 selection:bg-white selection:text-black">
+<body class="min-h-screen flex flex-col justify-center items-center px-6 selection:bg-zinc-700 selection:text-white">
     <div class="w-full max-w-sm space-y-12">
-        <header class="space-y-4 text-center">
-            <div class="flex justify-center mb-6">
-                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                    <div class="w-3 h-3 bg-black rounded-full"></div>
+        <header class="space-y-6 text-center">
+            <div class="flex justify-center mb-8">
+                <div
+                    class="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center shadow-lg shadow-white/5">
+                    <div class="w-4 h-4 bg-zinc-950 rounded-full"></div>
                 </div>
             </div>
-            <h1 class="text-3xl font-bold tracking-tighter">Scalar Relay</h1>
-            <p class="text-gray-500 text-sm">Enter your password to access the bridge.</p>
+            <div class="space-y-2">
+                <h1 class="text-4xl font-bold tracking-tight text-white italic">Scalar Relay</h1>
+                <p class="text-zinc-500 text-base font-medium">Dashboard access required</p>
+            </div>
         </header>
 
-        <form action="/login" method="POST" class="space-y-6">
+        <form action="/login" method="POST" class="space-y-8">
             <div class="space-y-2">
-                <input type="password" name="password" placeholder="Password"
-                    class="w-full geist-input rounded-md px-4 py-3 text-sm" required autofocus>
+                <input type="password" name="password" placeholder="Dashboard SecretKey"
+                    class="w-full geist-input rounded-lg px-6 py-4 text-base text-zinc-200 text-center" required
+                    autofocus>
             </div>
 
             <% if (error) { %>
-                <p class="text-[10px] text-red-500 font-bold uppercase tracking-widest text-center">
-                    <%= error %>
-                </p>
+                <div class="py-3 px-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p class="text-xs text-red-500 font-bold uppercase tracking-widest text-center">
+                        <%= error %>
+                    </p>
+                </div>
                 <% } %>
 
-                    <button type="submit" class="w-full geist-button py-3 rounded-md font-bold text-sm">
-                        Unlock
+                    <button type="submit"
+                        class="w-full geist-button py-4 rounded-lg font-bold text-sm uppercase tracking-[0.2em]">
+                        Unlock Bridge
                     </button>
         </form>
 
         <footer class="pt-12 text-center">
-            <p class="text-[10px] text-gray-700 font-mono">SES_GATEWAY_V1.2.0 • BCRYPT_ENABLED</p>
+            <p class="text-xs text-zinc-700 font-mono tracking-[0.3em] uppercase font-bold">Platinum Edition •
+                SES_V1.2.0</p>
         </footer>
     </div>
 </body>

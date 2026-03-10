@@ -10,28 +10,29 @@
     <style>
         body {
             font-family: 'Geist', sans-serif;
-            background-color: #000;
-            color: #fff;
+            background-color: #09090b;
+            color: #f4f4f5;
         }
 
         .geist-border {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .geist-input {
-            background: #000;
-            border: 1px solid #333;
-            transition: border-color 0.2s;
+            background: #111113;
+            border: 1px solid #27272a;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .geist-input:focus {
-            border-color: #fff;
+            border-color: #52525b;
+            box-shadow: 0 0 0 1px #52525b;
             outline: none;
         }
 
         .geist-button {
-            background: #fff;
-            color: #000;
+            background: #fafafa;
+            color: #09090b;
             transition: opacity 0.2s;
         }
 
@@ -44,87 +45,94 @@
         }
 
         .geist-secondary {
-            background: #111;
-            border: 1px solid #333;
-            color: #888;
+            background: #18181b;
+            border: 1px solid #27272a;
+            color: #a1a1aa;
             transition: border-color 0.2s, color 0.2s;
         }
 
         .geist-secondary:hover {
-            border-color: #666;
-            color: #fff;
+            border-color: #3f3f46;
+            color: #fafafa;
         }
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col justify-center items-center px-6 selection:bg-white selection:text-black">
-    <div class="w-full max-w-xl space-y-12">
-        <header class="space-y-4">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-white rounded-full"></div>
-                <span class="text-xs font-medium tracking-widest uppercase text-gray-500">Scalar Relay v1.2.0</span>
+<body
+    class="min-h-screen flex flex-col justify-center items-center px-6 selection:bg-zinc-700 selection:text-white pb-24">
+    <div class="w-full max-w-2xl space-y-16 py-20">
+        <header class="space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-zinc-400 rounded-full"></div>
+                <span class="text-sm font-bold tracking-widest uppercase text-zinc-500">Scalar Relay v1.2.0</span>
             </div>
-            <h1 class="text-4xl font-bold tracking-tighter">Initialize Bridge</h1>
-            <p class="text-gray-400 text-sm max-w-md">Configure your global relay settings. Default SMTP settings are
-                optional if you plan to provide credentials via API headers.</p>
+            <h1 class="text-5xl font-extrabold tracking-tight text-white italic">Initialize Bridge</h1>
+            <p class="text-zinc-400 text-base max-w-xl leading-relaxed font-medium">Configure your global relay
+                settings. The default gateway is optional—Scalar can operate purely through header-driven API
+                instructions.</p>
         </header>
 
-        <form action="/setup" method="POST" class="space-y-10">
+        <form action="/setup" method="POST" class="space-y-12">
             <!-- Auth -->
-            <section class="space-y-6">
-                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest border-b border-white/10 pb-2">
+            <section class="space-y-8">
+                <h2 class="text-xs font-black text-zinc-500 uppercase tracking-[0.3em] border-b border-zinc-800 pb-3">
                     Dashboard Security</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Primary Identity (Email)</label>
-                        <input type="email" name="primaryEmail" placeholder="me@example.com"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Primary
+                            Identity</label>
+                        <input type="email" name="primaryEmail" placeholder="admin@domain.com"
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200" required>
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Dashboard Password</label>
-                        <input type="password" name="dashboardPassword" placeholder="Minimum 8 characters"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm" required>
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Dashboard Key</label>
+                        <input type="password" name="dashboardPassword" placeholder="Secure phrase"
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200" required>
                     </div>
                 </div>
             </section>
 
             <!-- SMTP Gateway -->
-            <section class="space-y-6">
-                <div class="flex items-center justify-between border-b border-white/10 pb-2">
-                    <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest">Default Gateway (Optional)
+            <section class="space-y-8">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                    <h2 class="text-xs font-black text-zinc-500 uppercase tracking-[0.3em]">Default Gateway (Optional)
                     </h2>
-                    <span class="text-[10px] text-gray-600 font-mono">OPT_SMTP_V1</span>
+                    <span
+                        class="text-[10px] text-zinc-700 font-mono font-bold tracking-widest">GATEWAY_V1_OPTIONAL</span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Gateway Host</label>
-                        <input type="text" name="smtpHost" placeholder="smtp.gmail.com"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Gateway Host</label>
+                        <input type="text" name="smtpHost" placeholder="smtp.provider.com"
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Gateway Port</label>
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Gateway Port</label>
                         <input type="number" name="smtpPort" placeholder="465"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm">
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Gateway User</label>
-                        <input type="text" name="smtpUser" placeholder="relay@domain.com"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Gateway User</label>
+                        <input type="text" name="smtpUser" placeholder="api-relay"
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-gray-400">Gateway Secret</label>
-                        <input type="password" name="smtpPass" placeholder="App Password"
-                            class="w-full geist-input rounded-md px-4 py-2.5 text-sm">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Gateway
+                            Password</label>
+                        <input type="password" name="smtpPass" placeholder="••••••••"
+                            class="w-full geist-input rounded-lg px-5 py-3.5 text-base text-zinc-200">
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 italic">Leave blank to use Scalar purely as a header-driven API
-                    gateway.</p>
+                <p class="text-xs text-zinc-500 leading-relaxed italic font-medium">Leave SMTP fields empty to enable
+                    "Gateway Only" mode, where credentials must be passed via API headers.</p>
             </section>
 
-            <footer class="pt-6 flex items-center justify-between border-t border-white/10">
-                <p class="text-[10px] text-gray-600 font-mono">SEC_HASH_BCRYPT_R12</p>
-                <button type="submit" class="geist-button px-8 py-2.5 rounded-md font-bold text-sm">
+            <footer class="pt-10 flex items-center justify-between border-t border-zinc-800">
+                <p class="text-[10px] text-zinc-600 font-mono uppercase tracking-[0.2em] font-bold">Secured with Bcrypt
+                    R12</p>
+                <button type="submit"
+                    class="geist-button px-12 py-4 rounded-lg font-black text-xs uppercase tracking-[0.2em]">
                     Deploy Bridge
                 </button>
             </footer>
