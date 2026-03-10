@@ -23,7 +23,7 @@ docker run -d \
   -p 3000:3000 \
   -v $(pwd)/config:/app/config \
   --name scalar-relay \
-  ucchash111/scalar-relay
+  ucchash111/scalar-relay:latest
 ```
 
 ### Deploying to Coolify
@@ -47,12 +47,10 @@ To make Scalar Relay a "Pre-selected" service in Coolify:
 - Submit a PR to the [Coolify Services Repository](https://github.com/coollabsio/coolify/tree/main/templates/compose) with your `docker-compose.yml`.
 - Your service will then appear in the "Services" catalog for all Coolify users.
 
-#### 2. Docker Hub (Registry)
-To publish your own image:
-```bash
-docker build -t ucchash111/scalar-relay:latest .
-docker push ucchash111/scalar-relay:latest
-```
+#### 2. Docker Hub (Automated)
+This project is configured with GitHub Actions to automatically build and push the `latest` image to Docker Hub on every push to `main`.
+- **Image**: `ucchash111/scalar-relay:latest`
+- To use your own registry, update `.github/workflows/docker-publish.yml`.
 
 #### 3. NPM (CLI tool)
 You can also distribute Scalar as a global CLI:
